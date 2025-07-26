@@ -68,3 +68,4 @@ dmypy.json
 
 # Local scripts
 scripts/*
+.vercel

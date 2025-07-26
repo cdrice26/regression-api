@@ -1,0 +1,18 @@
+{
+  "builds": [
+    {
+      "src": "src/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/src/main.py"
+    }
+  ],
+  "env": {
+    "PYTHONPATH": "src",
+    "APP_MODULE": "main:app"
+  }
+}
