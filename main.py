@@ -7,6 +7,8 @@ from scipy.stats import t as t_dist  # type: ignore
 
 app = FastAPI(title="Regression API")
 
+EPSILON = 1e-15  # Small value to avoid division by zero
+
 
 class RegressionRequest(BaseModel):
     x: List[float]
@@ -73,9 +75,14 @@ def fit_regression(req: RegressionRequest) -> RegressionResponse:
     for idx in range(p):
         coef: float = float(beta[idx])
         std_err: float = float(se_beta[idx])
-        t_stat: float = coef / std_err
-        raw_p = t_dist.sf(float(abs(t_stat)), df)  # type: ignore
-        p_value: float = float(2.0 * raw_p)
+
+        if std_err < EPSILON:
+            t_stat: float = 1e15 if coef > 0 else -(1e15)
+            p_value: float = 0.0
+        else:
+            t_stat: float = coef / std_err
+            raw_p: float = t_dist.sf(float(abs(t_stat)), df)  # type: ignore
+            p_value: float = float(2.0 * raw_p)
         wald_results.append(
             CoefficientResult(
                 coefficient=coef,
