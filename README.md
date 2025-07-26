@@ -41,7 +41,7 @@ Once the server is running, you can access the API documentation at:
 - ReDoc: http://127.0.0.1:8000/redoc
 
 This will show you the available endpoint and how to use it, but essentially, it is at `/regression` and takes in a JSON payload like so:
-```json
+```ts
 {
   "x": float[],
   "y": float[],
@@ -50,7 +50,7 @@ This will show you the available endpoint and how to use it, but essentially, it
 ```
 and returns a JSON payload of the following format:
 
-```json
+```ts
 {
   "coefficients": float[],
   "correlation_coefficient": float,
