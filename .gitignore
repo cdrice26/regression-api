@@ -1,0 +1,67 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Test and coverage reports
+.coverage
+*.cover
+*.log
+nosetests.xml
+coverage.xml
+*.hypothesis/
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# C extensions
+*.so
+
+# Distribution files
+*.egg
+*.whl
+
+# Local configuration files
+*.local
+*.env
+
+# macOS junk files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
