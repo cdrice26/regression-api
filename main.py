@@ -3,11 +3,20 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import numpy as np
 from numpy.typing import NDArray
-from scipy.stats import t as t_dist  # type: ignore
+
+from utils import (
+    get_correlation_coefficient,
+    get_predictions,
+    get_r_squared,
+    get_residuals,
+    get_ss_residuals,
+    get_ss_total,
+    get_vander_monde_matrix,
+    run_f_test,
+    solve_normal_equations,
+)
 
 app = FastAPI(title="Regression API")
-
-EPSILON = 1e-15  # Small value to avoid division by zero
 
 
 class RegressionRequest(BaseModel):
@@ -16,10 +25,8 @@ class RegressionRequest(BaseModel):
     degree: int = 1
 
 
-class CoefficientResult(BaseModel):
-    coefficient: float
-    std_error: float
-    t_stat: float
+class TestResult(BaseModel):
+    f_stat: float
     p_value: float
 
 
@@ -27,7 +34,7 @@ class RegressionResponse(BaseModel):
     coefficients: List[float]
     correlation_coefficient: float
     r_squared: float
-    wald_test: List[CoefficientResult]
+    test_results: TestResult
 
 
 @app.post("/regression", response_model=RegressionResponse)
@@ -42,61 +49,34 @@ def fit_regression(req: RegressionRequest) -> RegressionResponse:
         raise HTTPException(status_code=400, detail="Length of x and y must match.")
 
     # Build design matrix with polynomial terms up to 'degree'
-    X: NDArray[np.float64] = np.vander(x, N=p, increasing=True).astype(np.float64)
+    X: NDArray[np.float64] = get_vander_monde_matrix(x, p)
 
     # Solve normal equations: beta = (Xᵀ X)⁻¹ Xᵀ y
-    XtX: NDArray[np.float64] = X.T @ X
     try:
-        XtX_inv: NDArray[np.float64] = np.linalg.inv(XtX).astype(np.float64)
+        beta = solve_normal_equations(X, y)
     except np.linalg.LinAlgError:
         raise HTTPException(status_code=400, detail="Design matrix XᵀX is singular.")
 
-    beta: NDArray[np.float64] = XtX_inv @ (X.T @ y)
-
     # Predictions and residuals
-    y_pred: NDArray[np.float64] = X @ beta
-    residuals: NDArray[np.float64] = y - y_pred
+    y_pred = get_predictions(X, beta)
 
     # Pearson correlation coefficient
-    correlation_coefficient: float = float(np.corrcoef(y, y_pred)[0, 1])
+    correlation_coefficient = get_correlation_coefficient(y, y_pred)
+    residuals = get_residuals(y, y_pred)
 
     # R-squared
-    ss_res: float = float(np.sum(residuals**2))
-    ss_tot: float = float(np.sum((y - np.mean(y)) ** 2))
-    r_squared: float = 1.0 - ss_res / ss_tot
+    ss_res = get_ss_residuals(residuals)
+    ss_tot = get_ss_total(y)
+    r_squared = get_r_squared(ss_res, ss_tot)
 
-    # Wald T-test for each coefficient
-    df: int = n - p
-    sigma2: float = ss_res / df
-    cov_beta: NDArray[np.float64] = sigma2 * XtX_inv
-    se_beta: NDArray[np.float64] = np.sqrt(np.diag(cov_beta))
-
-    wald_results: List[CoefficientResult] = []
-    for idx in range(p):
-        coef: float = float(beta[idx])
-        std_err: float = float(se_beta[idx])
-
-        if std_err < EPSILON:
-            t_stat: float = 1e15 if coef > 0 else -(1e15)
-            p_value: float = 0.0
-        else:
-            t_stat: float = coef / std_err
-            raw_p: float = t_dist.sf(float(abs(t_stat)), df)  # type: ignore
-            p_value: float = float(2.0 * raw_p)
-        wald_results.append(
-            CoefficientResult(
-                coefficient=coef,
-                std_error=std_err,
-                t_stat=t_stat,
-                p_value=p_value,
-            )
-        )
+    # F-test for overall significance
+    test_stat, p_value = run_f_test(n, p, ss_res, ss_tot)
 
     return RegressionResponse(
         coefficients=beta.tolist(),
         correlation_coefficient=correlation_coefficient,
         r_squared=r_squared,
-        wald_test=wald_results,
+        test_results=TestResult(f_stat=test_stat, p_value=p_value),
     )
 
 
