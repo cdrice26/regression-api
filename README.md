@@ -32,7 +32,7 @@ This is an API created with FastAPI that has a single endpoint `/regression` tha
 To run the application, use the following command:
 
 ```sh
-fastapi dev src/main.py
+python src/main.py
 ```
 
 Once the server is running, you can access the API documentation at:
