@@ -6,7 +6,7 @@ This is an API created with FastAPI that has a single endpoint `/regression` tha
 
 ## Requirements
 
-- Python 3.10+ (not tested on earlier versions)
+- Python 3.12+ (older versions may work, but it has not been tested on versions prior to this)
 
 ## Installation
 
