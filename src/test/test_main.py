@@ -34,7 +34,6 @@ def test_linear_correctness():
 
     assert "coefficients" in result
     assert len(result["coefficients"]) == 2  # slope and intercept
-    print(result)
     assert result["coefficients"][1] == pytest.approx(2.0)  # type: ignore
     assert result["coefficients"][0] == pytest.approx(0.0)  # type: ignore
     assert result["r_squared"] == pytest.approx(1.0)  # type: ignore
@@ -115,7 +114,6 @@ def test_another_linear_dataset():
 
     assert "coefficients" in result
     assert len(result["coefficients"]) == 2  # slope and intercept
-    print(result)
     assert result["coefficients"][0] == pytest.approx(-279.5496552)  # type: ignore # intercept
     assert result["coefficients"][1] == pytest.approx(0.153793103)  # type: ignore # slope
     assert result["r_squared"] == pytest.approx(0.41640111)  # type: ignore
@@ -134,6 +132,10 @@ def test_polynomial_regression():
 
     assert "coefficients" in result
     assert len(result["coefficients"]) == 3  # quadratic, linear, and constant terms
+    print(result["coefficients"])
+    assert result["coefficients"][0] == pytest.approx(4.0)  # type: ignore
+    assert result["coefficients"][1] == pytest.approx(-4.0)  # type: ignore
+    assert result["coefficients"][2] == pytest.approx(1.0)  # type: ignore
     assert result["r_squared"] == pytest.approx(1.0)  # type: ignore
 
     assert result["test_results"]["p_value"] == pytest.approx(0.0)  # type: ignore
