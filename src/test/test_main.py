@@ -132,13 +132,55 @@ def test_polynomial_regression():
 
     assert "coefficients" in result
     assert len(result["coefficients"]) == 3  # quadratic, linear, and constant terms
-    print(result["coefficients"])
     assert result["coefficients"][0] == pytest.approx(4.0)  # type: ignore
     assert result["coefficients"][1] == pytest.approx(-4.0)  # type: ignore
     assert result["coefficients"][2] == pytest.approx(1.0)  # type: ignore
     assert result["r_squared"] == pytest.approx(1.0)  # type: ignore
 
     assert result["test_results"]["p_value"] == pytest.approx(0.0)  # type: ignore
+
+
+def test_another_polynomial_dataset():
+    """
+    This dataset is from:
+
+    9.8 - Polynomial Regression Examples | STAT 501. (n.d.). PennState: Statistics Online Courses. https://online.stat.psu.edu/stat501/lesson/9/9.8
+    """
+    data: dict[str, list[int | float] | int] = {
+        "x": [50, 50, 50, 70, 70, 70, 80, 80, 80, 90, 90, 90, 100, 100, 100],
+        "y": [
+            3.3,
+            2.8,
+            2.9,
+            2.3,
+            2.6,
+            2.1,
+            2.5,
+            2.9,
+            2.4,
+            3.0,
+            3.1,
+            2.8,
+            3.3,
+            3.5,
+            3.0,
+        ],
+        "degree": 2,
+    }
+
+    response = client.post("/regression", json=data)
+    assert response.status_code == 200
+    result = response.json()
+
+    assert "coefficients" in result
+    assert len(result["coefficients"]) == 3  # quadratic, linear, and constant terms
+    assert result["coefficients"][0] == pytest.approx(7.96, abs=1e-2)  # type: ignore
+    assert result["coefficients"][1] == pytest.approx(-0.1537, abs=1e-4)  # type: ignore
+    assert result["coefficients"][2] == pytest.approx(0.001076, abs=1e-4)  # type: ignore
+    assert result["r_squared"] == pytest.approx(0.6732, abs=1e-4)  # type: ignore
+
+    assert result["test_results"]["f_stat"] == pytest.approx(12.36, abs=1e-2)  # type: ignore
+    assert result["test_results"]["p_value"] == pytest.approx(0.001, abs=1e-3)  # type: ignore
 
 
 def test_invalid_length():
