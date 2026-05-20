@@ -1,4 +1,6 @@
-# ChefDeck Python API
+# Regression API
+
+> NOTE: This project was a microservice for another project that has been superseeded, and as such is no longer needed for its original purpose and has been archived.
 
 ## Overview
 
